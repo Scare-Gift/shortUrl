@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"shorturl/go/src/db"
 	"shorturl/go/src/service"
@@ -33,15 +34,15 @@ func Login(c *gin.Context) {
 
 func Logout(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
-	splitted := strings.Split(authHeader, " ")
-	tokenString := splitted[1]
-	err := db.Rdb.Del(db.Rctx, tokenString)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "无效的操作"})
+	split := strings.Split(authHeader, " ")
+	tokenString := split[1]
+	val, _ := db.Rdb.Exists(db.Rctx, tokenString).Result()
+	log.Print(val)
+	if val == 1 {
+		db.Rdb.Del(db.Rctx, tokenString)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "非法token"})
+		return
 	}
 	c.JSON(200, gin.H{"message": "Logout successfully!"})
-}
-func Test(c *gin.Context) {
-	username, _ := c.Get("username")
-	c.JSON(http.StatusOK, gin.H{"username": username})
 }

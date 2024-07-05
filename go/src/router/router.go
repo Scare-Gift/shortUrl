@@ -11,13 +11,13 @@ func Router() *gin.Engine {
 
 	urlApi := router.Group("/api")
 	{
-		urlApi.POST("/short", controller.CreateShortUrl)
+		urlApi.GET("/:shortUrl", controller.ResolveShortUrl)
+		urlApi.Use(middleware.JWTAuth()).POST("/short", controller.CreateShortUrl)
 	}
 	userApi := router.Group("/user")
 	{
 		userApi.POST("/login", controller.Login)
 		userApi.Use(middleware.JWTAuth()).POST("/logout", controller.Logout)
-		userApi.Use(middleware.JWTAuth()).POST("test", controller.Test)
 	}
 	return router
 }
